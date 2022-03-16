@@ -395,11 +395,15 @@ func (t *Transport) getConn(cm *connectMethod) (*persistConn, error) {
 
 	if cm.targetScheme == "https" {
 		// Initiate TLS and check remote host name against certificate.
-		conn = tls.Client(conn, t.TLSClientConfig)
+		tlsCfg := t.TLSClientConfig.Clone()
+		if tlsCfg != nil {
+			tlsCfg.ServerName = cm.tlsHost()
+		}
+		conn = tls.Client(conn, tlsCfg)
 		if err = conn.(*tls.Conn).Handshake(); err != nil {
 			return nil, err
 		}
-		if t.TLSClientConfig == nil || !t.TLSClientConfig.InsecureSkipVerify {
+		if tlsCfg == nil || !tlsCfg.InsecureSkipVerify {
 			if err = conn.(*tls.Conn).VerifyHostname(cm.tlsHost()); err != nil {
 				return nil, err
 			}
