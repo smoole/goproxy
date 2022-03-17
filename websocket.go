@@ -88,7 +88,7 @@ func (proxy *ProxyHttpServer) websocketHandshake(ctx *ProxyCtx, req *http.Reques
 	targetTLSReader := bufio.NewReader(targetSiteConn)
 
 	// Read handshake response from target
-	resp, err := http.ReadResponse(targetTLSReader, req)
+	resp, err := proxy.ReadResponse(targetTLSReader, req)
 	if err != nil {
 		ctx.Warnf("Error reading handhsake response  %v", err)
 		return err

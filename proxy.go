@@ -31,6 +31,9 @@ type ProxyHttpServer struct {
 	ConnectDial func(network string, addr string) (net.Conn, error)
 	CertStore   CertStorage
 	KeepHeader  bool
+
+	CustomReadRequest  func(b *bufio.Reader) (*http.Request, error)
+	CustomReadResponse func(r *bufio.Reader, req *http.Request) (*http.Response, error)
 }
 
 var hasPort = regexp.MustCompile(`:\d+$`)
@@ -54,6 +57,20 @@ func isEof(r *bufio.Reader) bool {
 		return true
 	}
 	return false
+}
+
+func (proxy *ProxyHttpServer) ReadRequest(b *bufio.Reader) (*http.Request, error) {
+	if proxy.CustomReadRequest != nil {
+		return proxy.CustomReadRequest(b)
+	}
+	return http.ReadRequest(b)
+}
+
+func (proxy *ProxyHttpServer) ReadResponse(r *bufio.Reader, req *http.Request) (*http.Response, error) {
+	if proxy.CustomReadResponse != nil {
+		return proxy.CustomReadResponse(r, req)
+	}
+	return http.ReadResponse(r, req)
 }
 
 func (proxy *ProxyHttpServer) filterRequest(r *http.Request, ctx *ProxyCtx) (req *http.Request, resp *http.Response) {

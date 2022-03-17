@@ -145,7 +145,7 @@ func (proxy *ProxyHttpServer) handleHttps(w http.ResponseWriter, r *http.Request
 		for {
 			client := bufio.NewReader(proxyClient)
 			remote := bufio.NewReader(targetSiteCon)
-			req, err := http.ReadRequest(client)
+			req, err := proxy.ReadRequest(client)
 			if err != nil && err != io.EOF {
 				ctx.Warnf("cannot read request of MITM HTTP client: %+#v", err)
 			}
@@ -158,7 +158,7 @@ func (proxy *ProxyHttpServer) handleHttps(w http.ResponseWriter, r *http.Request
 					httpError(proxyClient, ctx, err)
 					return
 				}
-				resp, err = http.ReadResponse(remote, req)
+				resp, err = proxy.ReadResponse(remote, req)
 				if err != nil {
 					httpError(proxyClient, ctx, err)
 					return
@@ -197,7 +197,7 @@ func (proxy *ProxyHttpServer) handleHttps(w http.ResponseWriter, r *http.Request
 			defer rawClientTls.Close()
 			clientTlsReader := bufio.NewReader(rawClientTls)
 			for !isEof(clientTlsReader) {
-				req, err := http.ReadRequest(clientTlsReader)
+				req, err := proxy.ReadRequest(clientTlsReader)
 				var ctx = &ProxyCtx{Req: req, Session: atomic.AddInt64(&proxy.sess, 1), Proxy: proxy, UserData: ctx.UserData}
 				if err != nil && err != io.EOF {
 					return
@@ -360,7 +360,7 @@ func (proxy *ProxyHttpServer) NewConnectDialToProxyWithHandler(https_proxy strin
 			// Okay to use and discard buffered reader here, because
 			// TLS server will not speak until spoken to.
 			br := bufio.NewReader(c)
-			resp, err := http.ReadResponse(br, connectReq)
+			resp, err := proxy.ReadResponse(br, connectReq)
 			if err != nil {
 				c.Close()
 				return nil, err
@@ -401,7 +401,7 @@ func (proxy *ProxyHttpServer) NewConnectDialToProxyWithHandler(https_proxy strin
 			// Okay to use and discard buffered reader here, because
 			// TLS server will not speak until spoken to.
 			br := bufio.NewReader(c)
-			resp, err := http.ReadResponse(br, connectReq)
+			resp, err := proxy.ReadResponse(br, connectReq)
 			if err != nil {
 				c.Close()
 				return nil, err
