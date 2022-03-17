@@ -74,6 +74,15 @@ type Transport struct {
 	// (keep-alive) to keep to keep per-host.  If zero,
 	// DefaultMaxIdleConnsPerHost is used.
 	MaxIdleConnsPerHost int
+
+	CustomReadResponse func(r *bufio.Reader, req *http.Request) (*http.Response, error)
+}
+
+func (t *Transport) ReadResponse(r *bufio.Reader, req *http.Request) (*http.Response, error) {
+	if t.CustomReadResponse != nil {
+		return t.CustomReadResponse(r, req)
+	}
+	return http.ReadResponse(r, req)
 }
 
 // ProxyFromEnvironment returns the URL of the proxy to use for a
@@ -381,7 +390,7 @@ func (t *Transport) getConn(cm *connectMethod) (*persistConn, error) {
 		// Okay to use and discard buffered reader here, because
 		// TLS server will not speak until spoken to.
 		br := bufio.NewReader(conn)
-		resp, err := http.ReadResponse(br, connectReq)
+		resp, err := t.ReadResponse(br, connectReq)
 		if err != nil {
 			conn.Close()
 			return nil, err
@@ -577,7 +586,7 @@ func (pc *persistConn) readLoop() {
 			lastbody.Close() // assumed idempotent
 			lastbody = nil
 		}
-		resp, err := http.ReadResponse(pc.br, rc.req)
+		resp, err := pc.t.ReadResponse(pc.br, rc.req)
 
 		if err != nil {
 			pc.close()
