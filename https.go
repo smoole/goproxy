@@ -52,7 +52,7 @@ type ConnectAction struct {
 }
 
 func (v *ConnectAction) String() string {
-	return fmt.Sprintf("{Action: %v, Hijack: %v TLSConfig: %v}", v.Action, v.Hijack != nil, v.TLSConfig != nil)
+	return fmt.Sprintf("{Action: %v, Hijack: %v, TLSConfig: %v}", v.Action, v.Hijack != nil, v.TLSConfig != nil)
 }
 
 func stripPort(s string) string {
