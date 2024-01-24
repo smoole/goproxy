@@ -29,6 +29,10 @@ const (
 	ConnectProxyAuthHijack
 )
 
+func (v ConnectActionLiteral) String() string {
+	return [...]string{"Accept", "Reject", "Mitm", "Hijack", "HTTPMitm", "ProxyAuthHijack"}[v]
+}
+
 var (
 	OkConnect       = &ConnectAction{Action: ConnectAccept, TLSConfig: TLSConfigFromCA(&GoproxyCa)}
 	MitmConnect     = &ConnectAction{Action: ConnectMitm, TLSConfig: TLSConfigFromCA(&GoproxyCa)}
@@ -45,6 +49,10 @@ type ConnectAction struct {
 	Action    ConnectActionLiteral
 	Hijack    func(req *http.Request, client net.Conn, ctx *ProxyCtx)
 	TLSConfig func(host string, ctx *ProxyCtx) (*tls.Config, error)
+}
+
+func (v *ConnectAction) String() string {
+	return fmt.Sprintf("{Action: %v, Hijack: %v TLSConfig: %v}", v.Action, v.Hijack != nil, v.TLSConfig != nil)
 }
 
 func stripPort(s string) string {
