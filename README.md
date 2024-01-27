@@ -1,3 +1,9 @@
+# 修改
+一些方便使用但是原库满足不了的
+- set tls config servername when handshake
+- add CustomReadRequest/CustomReadResponse
+- add String() for ConnectAction/ConnectActionLiteral
+
 # Introduction
 
 [![GoDoc](https://godoc.org/github.com/elazarl/goproxy?status.svg)](https://godoc.org/github.com/elazarl/goproxy)
